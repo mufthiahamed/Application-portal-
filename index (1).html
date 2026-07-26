@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adelaide Business Technology Group — Applicant Verification Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B1220;
+    --surface: #111B2E;
+    --surface-raised: #16223A;
+    --line: #24314A;
+    --line-soft: #1B2740;
+    --text: #E7ECF3;
+    --text-dim: #8E9CB5;
+    --text-faint: #5D6B85;
+    --accent: #4FD1C5;
+    --accent-dim: #2C6560;
+    --amber: #F2B84B;
+    --green: #6EE7A8;
+    --red: #F0708A;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 800px at 15% -10%, #14203A 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent-dim); color:#fff;}
+  a{color:inherit;}
+
+  /* ---------- shell ---------- */
+  .shell{max-width:880px; margin:0 auto; padding:40px 24px 80px;}
+
+  .brandbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:28px; margin-bottom:36px; border-bottom:1px solid var(--line-soft);
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{
+    width:34px; height:34px; flex:none;
+  }
+  .brand-name{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px;
+    letter-spacing:0.005em; line-height:1.25; max-width:340px;
+  }
+  .brand-sub{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; color:var(--text-faint);
+    letter-spacing:0.12em; text-transform:uppercase; margin-top:2px;
+  }
+  .conn-status{
+    display:flex; align-items:center; gap:7px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-dim);
+    letter-spacing:0.04em;
+  }
+  .pulse-dot{
+    width:7px; height:7px; border-radius:50%; background:var(--green);
+    box-shadow:0 0 0 0 rgba(110,231,168,0.6); animation:pulse 2.2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(110,231,168,0.5);}
+    70%{box-shadow:0 0 0 6px rgba(110,231,168,0);}
+    100%{box-shadow:0 0 0 0 rgba(110,231,168,0);}
+  }
+
+  /* ---------- tabs ---------- */
+  .tabs{display:flex; gap:2px; margin-bottom:32px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:4px;}
+  .tab{
+    flex:1; text-align:center; padding:11px 10px; font-size:13px; font-weight:500;
+    color:var(--text-dim); cursor:pointer; border-radius:2px; user-select:none;
+    font-family:'Space Grotesk', sans-serif; letter-spacing:0.01em;
+    transition:color .15s ease, background .15s ease;
+  }
+  .tab.active{background:var(--surface-raised); color:var(--text); box-shadow:inset 0 0 0 1px var(--line);}
+  .tab:hover:not(.active){color:var(--text);}
+
+  .view{display:none; animation:fade .35s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:32px;
+  }
+  .panel-head{margin-bottom:26px;}
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--accent);
+    letter-spacing:0.14em; text-transform:uppercase; margin-bottom:8px;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif; font-size:24px; font-weight:600;
+    margin:0 0 6px; letter-spacing:-0.01em;
+  }
+  .lede{color:var(--text-dim); font-size:14px; line-height:1.6; max-width:56ch; margin:0;}
+
+  /* ---------- form ---------- */
+  fieldset{border:none; padding:0; margin:0 0 28px;}
+  legend{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-faint);
+    letter-spacing:0.1em; text-transform:uppercase; padding:0 0 14px; width:100%;
+    border-bottom:1px solid var(--line-soft); margin-bottom:18px;
+  }
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .field{margin-bottom:18px;}
+  .field.full{grid-column:1/-1;}
+  label{
+    display:block; font-size:12.5px; font-weight:500; color:var(--text-dim);
+    margin-bottom:7px; letter-spacing:0.01em;
+  }
+  label .req{color:var(--accent); margin-left:3px;}
+  label .hint{color:var(--text-faint); font-weight:400; text-transform:none; letter-spacing:0;}
+  input[type=text], input[type=tel], input[type=date], input[type=email], input[type=password], textarea{
+    width:100%; background:#0D1526; border:1px solid var(--line); color:var(--text);
+    padding:11px 12px; border-radius:2px; font-size:14px; font-family:'Inter', sans-serif;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  textarea{resize:vertical; min-height:88px; line-height:1.5; font-family:'Inter',sans-serif;}
+  input:focus, textarea:focus{
+    outline:none; border-color:var(--accent); background:#0F1A2E;
+  }
+  input:focus-visible, textarea:focus-visible, button:focus-visible, .tab:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+  .field-note{font-size:11.5px; color:var(--text-faint); margin-top:6px; line-height:1.5;}
+  .field-note.err{color:var(--red);}
+  .field-note.ok{color:var(--green);}
+
+  /* file upload */
+  .file-drop{
+    border:1px dashed var(--line); background:#0D1526; border-radius:2px;
+    padding:16px; display:flex; align-items:center; gap:12px; cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .file-drop:hover{border-color:var(--text-faint);}
+  .file-drop.has-file{border-style:solid; border-color:var(--accent-dim);}
+  .file-drop input{display:none;}
+  .file-icon{
+    width:30px; height:30px; flex:none; border-radius:2px; background:var(--surface-raised);
+    display:flex; align-items:center; justify-content:center; color:var(--text-dim);
+  }
+  .file-text{font-size:12.5px; color:var(--text-dim); line-height:1.4;}
+  .file-text b{color:var(--text); font-weight:500;}
+  .file-text .fname{font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--accent);}
+
+  .pw-strength{display:flex; gap:4px; margin-top:8px;}
+  .pw-strength i{flex:1; height:3px; background:var(--line); border-radius:2px;}
+  .pw-strength i.on-weak{background:var(--red);}
+  .pw-strength i.on-mid{background:var(--amber);}
+  .pw-strength i.on-strong{background:var(--green);}
+
+  button.primary{
+    width:100%; background:var(--accent); color:#06201D; border:none; padding:13px 20px;
+    font-size:14px; font-weight:600; border-radius:2px; cursor:pointer; letter-spacing:0.01em;
+    font-family:'Space Grotesk', sans-serif; transition:background .15s ease, transform .05s ease;
+  }
+  button.primary:hover{background:#63dbd0;}
+  button.primary:active{transform:scale(0.995);}
+  button.ghost{
+    width:100%; background:transparent; color:var(--text-dim); border:1px solid var(--line);
+    padding:11px 20px; font-size:13px; border-radius:2px; cursor:pointer; margin-top:10px;
+    font-family:'Inter', sans-serif;
+  }
+  button.ghost:hover{border-color:var(--text-faint); color:var(--text);}
+
+  .error-banner{
+    background:rgba(240,112,138,0.08); border:1px solid rgba(240,112,138,0.35); color:var(--red);
+    padding:12px 14px; border-radius:2px; font-size:12.5px; margin-bottom:20px; display:none;
+  }
+  .error-banner.show{display:block;}
+
+  /* ---------- confirmation ---------- */
+  .confirm{text-align:left;}
+  .confirm-id{
+    font-family:'JetBrains Mono', monospace; font-size:22px; color:var(--accent);
+    letter-spacing:0.04em; margin:6px 0 22px; padding:14px 16px; background:#0D1526;
+    border:1px solid var(--line); border-radius:2px; display:inline-block;
+  }
+
+  /* ---------- login ---------- */
+  .login-panel{max-width:420px; margin:0 auto;}
+
+  /* ---------- status / timeline ---------- */
+  .applicant-card{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding-bottom:22px; margin-bottom:24px; border-bottom:1px solid var(--line-soft);
+  }
+  .applicant-name{font-family:'Space Grotesk', sans-serif; font-size:19px; font-weight:600;}
+  .applicant-meta{font-size:12.5px; color:var(--text-dim); margin-top:4px; line-height:1.6;}
+  .applicant-meta span{color:var(--text-faint);}
+  .status-pill{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    padding:6px 12px; border-radius:20px; white-space:nowrap;
+  }
+  .status-pill.pending{background:rgba(242,184,75,0.12); color:var(--amber); border:1px solid rgba(242,184,75,0.35);}
+  .status-pill.review{background:rgba(79,209,197,0.12); color:var(--accent); border:1px solid rgba(79,209,197,0.35);}
+  .status-pill.approved{background:rgba(110,231,168,0.12); color:var(--green); border:1px solid rgba(110,231,168,0.35);}
+
+  .chain{position:relative; padding-left:6px;}
+  .chain-step{position:relative; padding:0 0 28px 40px;}
+  .chain-step:last-child{padding-bottom:0;}
+  .chain-step::before{
+    content:''; position:absolute; left:14px; top:30px; bottom:0; width:1px; background:var(--line);
+  }
+  .chain-step:last-child::before{display:none;}
+  .lock{
+    position:absolute; left:0; top:0; width:30px; height:30px; border-radius:50%;
+    background:var(--surface-raised); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .chain-step.done .lock{background:rgba(110,231,168,0.12); border-color:var(--green); color:var(--green);}
+  .chain-step.active .lock{background:rgba(79,209,197,0.12); border-color:var(--accent); color:var(--accent);}
+  .chain-step.todo .lock{color:var(--text-faint);}
+  .chain-title{font-size:14px; font-weight:600; color:var(--text);}
+  .chain-step.todo .chain-title{color:var(--text-faint); font-weight:500;}
+  .chain-time{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-faint); margin-top:3px;}
+  .chain-desc{font-size:12.5px; color:var(--text-dim); margin-top:5px; line-height:1.55; max-width:52ch;}
+
+  .about-block{margin-top:28px; padding-top:22px; border-top:1px solid var(--line-soft);}
+  .about-label{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--text-faint);
+    letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;
+  }
+  .about-text{font-size:13.5px; line-height:1.65; color:var(--text-dim);}
+  .doc-row{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  .doc-chip{
+    display:flex; align-items:center; gap:8px; background:#0D1526; border:1px solid var(--line);
+    padding:8px 12px; border-radius:2px; font-size:12px; color:var(--text-dim);
+  }
+  .doc-chip b{color:var(--text); font-weight:500;}
+
+  .footnote{
+    margin-top:40px; padding-top:20px; border-top:1px solid var(--line-soft);
+    font-size:11.5px; color:var(--text-faint); line-height:1.6;
+  }
+
+  @media (max-width:600px){
+    .grid{grid-template-columns:1fr;}
+    .panel{padding:22px;}
+    .brandbar{flex-direction:column; align-items:flex-start; gap:14px;}
+    .applicant-card{flex-direction:column; gap:14px;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="brandbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <rect x="1" y="1" width="32" height="32" rx="6" stroke="#4FD1C5" stroke-width="1.4"/>
+        <path d="M17 9a5 5 0 00-5 5v2.2h1.8V14a3.2 3.2 0 016.4 0v2.2H21V14a5 5 0 00-4-4.9z" fill="#4FD1C5"/>
+        <rect x="10.5" y="16.2" width="13" height="9.5" rx="1.4" fill="#4FD1C5" fill-opacity="0.16" stroke="#4FD1C5" stroke-width="1.2"/>
+        <circle cx="17" cy="20.2" r="1.4" fill="#4FD1C5"/>
+        <path d="M17 21.6v2" stroke="#4FD1C5" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="brand-name">Adelaide Business Technology Group</div>
+        <div class="brand-sub">Applicant Verification Portal</div>
+      </div>
+    </div>
+    <div class="conn-status"><span class="pulse-dot"></span> SECURE SESSION</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-view="apply">Apply</div>
+    <div class="tab" data-view="login">Log in</div>
+    <div class="tab" data-view="status">My status</div>
+  </div>
+
+  <!-- ============ APPLY ============ -->
+  <div class="view active" id="view-apply">
+    <div class="panel">
+      <div id="apply-form-wrap">
+        <div class="panel-head">
+          <div class="eyebrow">New submission</div>
+          <h1>Start your application</h1>
+          <p class="lede">Fields marked <span style="color:var(--accent)">*</span> are required for identity verification. Your documents stay attached to this application only.</p>
+        </div>
+
+        <div class="error-banner" id="apply-error"></div>
+
+        <form id="apply-form" novalidate>
+          <fieldset>
+            <legend>Personal details</legend>
+            <div class="grid">
+              <div class="field">
+                <label>First name<span class="req">*</span></label>
+                <input type="text" id="f-first" autocomplete="given-name" required>
+              </div>
+              <div class="field">
+                <label>Last name<span class="req">*</span></label>
+                <input type="text" id="f-last" autocomplete="family-name" required>
+              </div>
+              <div class="field">
+                <label>Date of birth<span class="req">*</span></label>
+                <input type="date" id="f-dob" required>
+              </div>
+              <div class="field">
+                <label>Phone number<span class="req">*</span></label>
+                <input type="tel" id="f-phone" placeholder="+61 4XX XXX XXX" required>
+              </div>
+              <div class="field full">
+                <label>Residential address<span class="req">*</span></label>
+                <textarea id="f-address" rows="2" placeholder="Street, suburb, state, postcode" required></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>About you</legend>
+            <div class="field full">
+              <label>Tell us about yourself and your areas of interest<span class="req">*</span> <span class="hint">— what draws you to this role or program</span></label>
+              <textarea id="f-about" rows="4" placeholder="A short description of your background and the areas you're most interested in..." required></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Identity &amp; documents</legend>
+            <div class="grid">
+              <div class="field full">
+                <label>Government ID document<span class="req">*</span> <span class="hint">— passport, driver's licence, or similar</span></label>
+                <label class="file-drop" id="drop-id" for="f-idfile">
+                  <div class="file-icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="1.2" stroke="currentColor" stroke-width="1.2"/><circle cx="5.2" cy="7" r="1.3" stroke="currentColor" stroke-width="1"/><path d="M3.5 11c.4-1.3 1.3-2 1.9-2s1.4.7 1.8 2" stroke="currentColor" stroke-width="1"/><path d="M9.5 6.5h3.2M9.5 8.7h3.2" stroke="currentColor" stroke-width="1"/></svg>
+                  </div>
+                  <div class="file-text" id="drop-id-text"><b>Upload ID document</b><br>PDF, JPG or PNG · click to browse</div>
+                </label>
+                <input type="file" id="f-idfile" accept=".pdf,.jpg,.jpeg,.png" required>
+              </div>
+              <div class="field full">
+                <label>CV / resume<span class="req">*</span></label>
+                <label class="file-drop" id="drop-cv" for="f-cvfile">
+                  <div class="file-icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 1.5h5.5L12 4v9.5a1 1 0 01-1 1H4a1 1 0 01-1-1v-11a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2"/><path d="M9.3 1.5V4h2.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.7 8h4.2M4.7 10h4.2M4.7 6h2.5" stroke="currentColor" stroke-width="1"/></svg>
+                  </div>
+                  <div class="file-text" id="drop-cv-text"><b>Upload your CV</b><br>PDF or DOCX · click to browse</div>
+                </label>
+                <input type="file" id="f-cvfile" accept=".pdf,.doc,.docx" required>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Security questions</legend>
+            <p class="field-note" style="margin:-6px 0 16px;">Used to verify your identity if you ever need to recover your account. All five are required.</p>
+            <div class="grid">
+              <div class="field full">
+                <label>Security question 1 — What is your mother's maiden name?<span class="req">*</span></label>
+                <input type="text" id="f-sq1" autocomplete="off" required>
+              </div>
+              <div class="field full">
+                <label>Security question 2 — What was the name of your first pet?<span class="req">*</span></label>
+                <input type="text" id="f-sq2" autocomplete="off" required>
+              </div>
+              <div class="field full">
+                <label>Security question 3 — What city were you born in?<span class="req">*</span></label>
+                <input type="text" id="f-sq3" autocomplete="off" required>
+              </div>
+              <div class="field full">
+                <label>Security question 4 — What was the name of your first school?<span class="req">*</span></label>
+                <input type="text" id="f-sq4" autocomplete="off" required>
+              </div>
+              <div class="field full">
+                <label>Security question 5 — What street did you grow up on?<span class="req">*</span></label>
+                <input type="text" id="f-sq5" autocomplete="off" required>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Create your login</legend>
+            <div class="grid">
+              <div class="field full">
+                <label>Email address<span class="req">*</span> <span class="hint">— you'll use this to log in</span></label>
+                <input type="email" id="f-email" autocomplete="email" required>
+              </div>
+              <div class="field">
+                <label>Create password<span class="req">*</span></label>
+                <input type="password" id="f-pw" autocomplete="new-password" required>
+                <div class="pw-strength"><i id="pw-bar-1"></i><i id="pw-bar-2"></i><i id="pw-bar-3"></i></div>
+                <div class="field-note" id="pw-note">Use 8+ characters, a number and a symbol.</div>
+              </div>
+              <div class="field">
+                <label>Confirm password<span class="req">*</span></label>
+                <input type="password" id="f-pw2" autocomplete="new-password" required>
+              </div>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="primary">Submit application</button>
+        </form>
+      </div>
+
+      <div id="apply-confirm" class="confirm" style="display:none;">
+        <div class="eyebrow">Submission received</div>
+        <h1>You're in the queue, <span id="confirm-name"></span>.</h1>
+        <p class="lede">Keep this reference — you'll need your email and password (not this ID) to log in and check your status.</p>
+        <div class="confirm-id" id="confirm-id"></div>
+        <button class="ghost" id="goto-login-btn" style="max-width:220px;">Go to log in →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LOGIN ============ -->
+  <div class="view" id="view-login">
+    <div class="panel login-panel">
+      <div class="panel-head">
+        <div class="eyebrow">Returning applicant</div>
+        <h1>Log in</h1>
+        <p class="lede">Use the email and password you created when you submitted your application.</p>
+      </div>
+      <div class="error-banner" id="login-error"></div>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="l-email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="l-pw" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="primary">Log in</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ STATUS ============ -->
+  <div class="view" id="view-status">
+    <div class="panel" id="status-panel-signed-out">
+      <div class="panel-head">
+        <div class="eyebrow">Locked</div>
+        <h1>No active session</h1>
+        <p class="lede">Log in with the email and password from your application to view your status.</p>
+      </div>
+      <button class="ghost" id="goto-login-btn-2" style="max-width:220px;">Go to log in →</button>
+    </div>
+
+    <div class="panel" id="status-panel-signed-in" style="display:none;">
+      <div class="applicant-card">
+        <div>
+          <div class="applicant-name" id="status-name"></div>
+          <div class="applicant-meta">
+            Reference <span id="status-id"></span> &nbsp;·&nbsp; Submitted <span id="status-submitted"></span>
+          </div>
+        </div>
+        <div class="status-pill" id="status-pill"></div>
+      </div>
+
+      <div class="chain" id="status-chain"></div>
+
+      <div class="about-block">
+        <div class="about-label">Applicant summary</div>
+        <div class="applicant-meta" style="margin-bottom:14px;">
+          <span>DOB</span> <span id="status-dob"></span> &nbsp;·&nbsp;
+          <span>Phone</span> <span id="status-phone"></span><br>
+          <span>Address</span> <span id="status-address"></span>
+        </div>
+        <div class="about-label">Interests &amp; background</div>
+        <div class="about-text" id="status-about"></div>
+        <div class="doc-row">
+          <div class="doc-chip">🪪 <b>ID document:</b>&nbsp;<span id="status-idfile"></span></div>
+          <div class="doc-chip">📄 <b>CV:</b>&nbsp;<span id="status-cvfile"></span></div>
+        </div>
+      </div>
+
+      <button class="ghost" id="advance-btn">Simulate review progress →</button>
+      <button class="ghost" id="logout-btn">Log out</button>
+    </div>
+  </div>
+
+  <div class="footnote">
+    Demo build: applications are stored in this browser tab's memory only and reset on reload — nothing is written to a server or to disk. Wire this up to a real backend before handling genuine ID documents or passwords.
+  </div>
+</div>
+
+<script>
+(function(){
+  const applicants = {};   // email -> applicant record (in-memory only, per session)
+  let currentEmail = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- tab switching ----------
+  const tabs = document.querySelectorAll('.tab');
+  const views = { apply:$('view-apply'), login:$('view-login'), status:$('view-status') };
+  function showView(name){
+    Object.keys(views).forEach(k=>{
+      views[k].classList.toggle('active', k===name);
+    });
+    tabs.forEach(t=>t.classList.toggle('active', t.dataset.view===name));
+    if(name==='status') renderStatus();
+  }
+  tabs.forEach(t=> t.addEventListener('click', ()=> showView(t.dataset.view)));
+  $('goto-login-btn').addEventListener('click', ()=> showView('login'));
+  $('goto-login-btn-2').addEventListener('click', ()=> showView('login'));
+
+  // ---------- file drop text ----------
+  function wireFile(inputId, dropId, textId, label){
+    const input = $(inputId), drop = $(dropId), text = $(textId);
+    input.addEventListener('change', ()=>{
+      if(input.files && input.files[0]){
+        drop.classList.add('has-file');
+        text.innerHTML = `<b>${label} attached</b><br><span class="fname">${input.files[0].name}</span>`;
+      } else {
+        drop.classList.remove('has-file');
+      }
+    });
+  }
+  wireFile('f-idfile','drop-id','drop-id-text','ID document');
+  wireFile('f-cvfile','drop-cv','drop-cv-text','CV');
+
+  // ---------- password strength ----------
+  const pwInput = $('f-pw');
+  pwInput.addEventListener('input', ()=>{
+    const v = pwInput.value;
+    let score = 0;
+    if(v.length>=8) score++;
+    if(/[0-9]/.test(v) && /[^A-Za-z0-9]/.test(v)) score++;
+    if(v.length>=12 && /[a-z]/.test(v) && /[A-Z]/.test(v)) score++;
+    const bars = [$('pw-bar-1'),$('pw-bar-2'),$('pw-bar-3')];
+    bars.forEach(b=> b.className='');
+    const note = $('pw-note');
+    if(v.length===0){ note.textContent='Use 8+ characters, a number and a symbol.'; note.className='field-note'; }
+    else if(score<=1){ bars[0].className='on-weak'; note.textContent='Weak — add length, a number and a symbol.'; note.className='field-note err'; }
+    else if(score===2){ bars[0].className='on-mid'; bars[1].className='on-mid'; note.textContent='Okay — a mix of case and length helps.'; note.className='field-note'; }
+    else{ bars[0].className='on-strong'; bars[1].className='on-strong'; bars[2].className='on-strong'; note.textContent='Strong password.'; note.className='field-note ok'; }
+  });
+
+  // ---------- apply form ----------
+  function genRef(){
+    const y = new Date().getFullYear();
+    const n = Math.floor(1000 + Math.random()*9000);
+    return `ABTG-${y}-${n}`;
+  }
+  function showApplyError(msg){
+    const el = $('apply-error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+  function clearApplyError(){ $('apply-error').classList.remove('show'); }
+
+  $('apply-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    clearApplyError();
+
+    const first = $('f-first').value.trim();
+    const last = $('f-last').value.trim();
+    const dob = $('f-dob').value;
+    const phone = $('f-phone').value.trim();
+    const address = $('f-address').value.trim();
+    const about = $('f-about').value.trim();
+    const sq1 = $('f-sq1').value.trim();
+    const sq2 = $('f-sq2').value.trim();
+    const sq3 = $('f-sq3').value.trim();
+    const sq4 = $('f-sq4').value.trim();
+    const sq5 = $('f-sq5').value.trim();
+    const email = $('f-email').value.trim().toLowerCase();
+    const pw = $('f-pw').value;
+    const pw2 = $('f-pw2').value;
+    const idFile = $('f-idfile').files[0];
+    const cvFile = $('f-cvfile').files[0];
+
+    if(!first||!last||!dob||!phone||!address||!about||!email||!sq1||!sq2||!sq3||!sq4||!sq5){
+      showApplyError('Please complete every required field before submitting, including all five security questions.');
+      return;
+    }
+    if(!idFile){ showApplyError('Please attach a government ID document.'); return; }
+    if(!cvFile){ showApplyError('Please attach your CV.'); return; }
+    if(pw.length<8){ showApplyError('Your password needs to be at least 8 characters.'); return; }
+    if(pw!==pw2){ showApplyError('Passwords do not match.'); return; }
+    if(applicants[email]){ showApplyError('An application already exists for this email — try logging in instead.'); return; }
+
+    const ref = genRef();
+    applicants[email] = {
+      ref, first, last, dob, phone, address, about, email, pw, sq1, sq2, sq3, sq4, sq5,
+      idFileName: idFile.name, cvFileName: cvFile.name,
+      submitted: new Date(),
+      stage: 0 // 0=Submitted,1=Verification,2=Review,3=Decision
+    };
+
+    $('confirm-name').textContent = first;
+    $('confirm-id').textContent = ref;
+    $('apply-form-wrap').style.display = 'none';
+    $('apply-confirm').style.display = 'block';
+  });
+
+  // ---------- login form ----------
+  function showLoginError(msg){
+    const el = $('login-error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+  $('login-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    $('login-error').classList.remove('show');
+    const email = $('l-email').value.trim().toLowerCase();
+    const pw = $('l-pw').value;
+    const rec = applicants[email];
+    if(!rec || rec.pw !== pw){
+      showLoginError('That email and password combination doesn\'t match an application on file.');
+      return;
+    }
+    currentEmail = email;
+    showView('status');
+  });
+
+  // ---------- status ----------
+  const STAGES = [
+    { key:'submitted', title:'Application submitted', desc:'Your details and documents were received.' },
+    { key:'verify', title:'Identity verification', desc:'Your ID document is being checked against your details.' },
+    { key:'review', title:'Under review', desc:'Your background and CV are being assessed by the team.' },
+    { key:'decision', title:'Decision', desc:'A final outcome will appear here once review is complete.' }
+  ];
+  function pillFor(stage){
+    if(stage>=3) return { cls:'approved', label:'Approved' };
+    if(stage>=1) return { cls:'review', label:'Under review' };
+    return { cls:'pending', label:'Pending verification' };
+  }
+  function fmtDate(d){
+    return d.toLocaleDateString(undefined,{ day:'numeric', month:'short', year:'numeric' });
+  }
+  function renderStatus(){
+    const signedOut = $('status-panel-signed-out');
+    const signedIn = $('status-panel-signed-in');
+    if(!currentEmail || !applicants[currentEmail]){
+      signedOut.style.display='block'; signedIn.style.display='none';
+      return;
+    }
+    signedOut.style.display='none'; signedIn.style.display='block';
+    const rec = applicants[currentEmail];
+
+    $('status-name').textContent = `${rec.first} ${rec.last}`;
+    $('status-id').textContent = rec.ref;
+    $('status-submitted').textContent = fmtDate(rec.submitted);
+    const p = pillFor(rec.stage);
+    const pill = $('status-pill'); pill.className = 'status-pill '+p.cls; pill.textContent = p.label;
+
+    $('status-dob').textContent = rec.dob;
+    $('status-phone').textContent = rec.phone;
+    $('status-address').textContent = rec.address;
+    $('status-about').textContent = rec.about;
+    $('status-idfile').textContent = rec.idFileName;
+    $('status-cvfile').textContent = rec.cvFileName;
+
+    const chain = $('status-chain');
+    chain.innerHTML = '';
+    STAGES.forEach((s, i)=>{
+      const div = document.createElement('div');
+      const state = i < rec.stage ? 'done' : (i===rec.stage ? 'active' : 'todo');
+      div.className = 'chain-step '+state;
+      div.innerHTML = `
+        <div class="lock">
+          ${state==='done'
+            ? '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="3.5" y="7" width="9" height="6.5" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.2"/></svg>'}
+        </div>
+        <div class="chain-title">${s.title}</div>
+        <div class="chain-time">${i<=rec.stage ? fmtDate(new Date(rec.submitted.getTime()+i*86400000)) : 'Not yet reached'}</div>
+        <div class="chain-desc">${s.desc}</div>
+      `;
+      chain.appendChild(div);
+    });
+
+    $('advance-btn').style.display = rec.stage>=3 ? 'none' : 'block';
+  }
+  $('advance-btn').addEventListener('click', ()=>{
+    if(currentEmail && applicants[currentEmail] && applicants[currentEmail].stage<3){
+      applicants[currentEmail].stage++;
+      renderStatus();
+    }
+  });
+  $('logout-btn').addEventListener('click', ()=>{
+    currentEmail = null;
+    $('l-email').value=''; $('l-pw').value='';
+    showView('login');
+  });
+
+})();
+</script>
+</body>
+</html>
